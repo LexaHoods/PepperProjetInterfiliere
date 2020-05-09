@@ -9,4 +9,6 @@ L’objectif de ce projet est la prise en main du robot Pepper, développé par 
   `InstallationRosIndigo.pdf` 
   
 - Dans le dossier `Programmes`vous y retrouverez : 
- `remote-control-0.0.2.html`
+ `Code source - JS`
+ `opencv-face-recognition`
+ `opencv-face-recognition.zip` (version compilée)
