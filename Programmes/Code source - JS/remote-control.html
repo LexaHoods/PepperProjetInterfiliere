@@ -276,12 +276,16 @@ function main() {
 				return;
 
 			switch(info[0][0]) {
-				case 'A':
-					// on affiche le site A
+				case 'SITEISTY':
+					pepper.ALTabletService.showWebview('http://www.isty.uvsq.fr/'); //Affiche le siteweb de l'ISTY
 					break;
-				case 'B':
-					// on affiche le site B
+				case 'PLAN2EME':
+					// on affiche le plan du 2ème étage ... 
 					break;
+				case 'CAFET':
+					// on affiche l'application de la cafetaria ...
+					break;
+			
 			}
 		});
 	});
@@ -293,11 +297,11 @@ function main() {
 				return;
 
 			switch(info[1][0][1]) {
-				case 'A':
-					// on affiche le site A
+				case '68':
+					pepper.ALTabletService.showWebview('http://www.isty.uvsq.fr/'); //Affiche le siteweb de l'ISTY
 					break;
-				case 'B':
-					// on affiche le site B
+				case '114':
+					// on affiche l'application Cafet' par exemple ...
 					break;
 			}
 		});
