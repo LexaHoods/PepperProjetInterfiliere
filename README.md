@@ -1,6 +1,6 @@
 # Projet Inter-filiere Pepper
 
-Dans le cadre d’un projet inter-filière proposé par l’ISTY, les spécialités informatiques, systèmes embarqués et mécatroniques ont été amenées à travailler ensemble. 
+Dans le cadre d’un projet inter-filière proposé par l’ISTY, les spécialités informatique, systèmes embarqués et mécatronique ont été amenées à travailler ensemble. 
 
 L’objectif de ce projet est la prise en main du robot Pepper, développé par la société SoftBank Robotics, en utilisant la plateforme de développement logicielle ROS (Robot Operating System) ainsi que les différents SDK mis à dispositions par la société.
 
