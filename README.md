@@ -9,8 +9,7 @@ L’objectif de ce projet est la prise en main du robot Pepper, développé par 
   `InstallationRosIndigo.pdf` 
   
 - Dans le dossier `Programmes`vous y retrouverez : 
-```
- Code source - JS 
+``` Code source - JS 
  opencv-face-recognition
  opencv-face-recognition.zip` (version compilée) 
  ```
