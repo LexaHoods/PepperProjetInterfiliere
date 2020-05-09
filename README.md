@@ -12,5 +12,5 @@ L’objectif de ce projet est la prise en main du robot Pepper, développé par 
 ``` 
  Code source - JS 
  opencv-face-recognition
- opencv-face-recognition.zip` (version compilée) 
+ opencv-face-recognition.zip (version compilée) 
  ```
