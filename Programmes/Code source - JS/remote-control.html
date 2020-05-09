@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<style>
+body {
+	font-family: monospace;
+	background-color: #222;
+	color: #eee;
+}
+.center {
+	text-align: center;
+}
+body > div {
+	margin: 16px auto;
+}
+.progress-bar {
+	width: 100%;
+	background-color: #444;
+}
+.progress-bar div {
+	background-color: #2b2;
+	text-align: center;
+	padding: 2px 6px;
+}
+.move-pepper-arrows {
+	font-size: 2.5em;
+	text-align: center;
+}
+.move-pepper-arrows {
+	font-size: 2.5em;
+	text-align: center;
+	user-select: none;
+	display: inline-block;
+	border: 1px solid #eee;
+	border-radius: 4px;
+	padding: 20px 0;
+}
+.move-pepper-arrows .arrow {
+	display: inline-block;
+	border-radius: 50%;
+	cursor: pointer;
+	margin: 0 20px;
+	height: 38px;
+	width: 38px;
+}
+.move-pepper-arrows .arrow:hover {
+	background-color: #444;
+}
+.move-pepper-arrows .arrow:active {
+	background-color: #555;
+}
+button {
+	outline: 0;
+	padding: 8px;
+	color: #fff;
+	cursor: pointer;
+	border-radius: 4px;
+	border: 2px solid #eee;
+	background-color: #2b2;
+}
+button:hover {
+	background-color: #3c3;
+}
+button:active {
+	background-color: #4d4;
+}
+
+.buttons, .axes {
+	padding: 1em;
+	text-align: center;
+}
+
+.axis {
+	min-width: 200px;
+	margin: 1em;
+	color: #2b2;
+}
+
+#controller, #controller0, #controller1, #controller2, #controller3 {
+	text-align: center;
+}
+</style>
+
+<script src="http://192.168.43.2/libs/qi/2/qi.js"></script>
+<script src="gamepad.js"></script>
+
+</head>
+<body>
+
+<div class="progress-bar" id="battery-level">
+	<div></div>
+</div>
+
+<div class="center">
+	<input type="text" id="text-to-speech" placeholder="écrivez qqch puis [entrée]"/>
+</div>
+
+<div class="center">
+	<div class="move-pepper-arrows">
+		<div class="arrow">&#8593;</div>
+		<div>
+			<div class="arrow">&#8592;</div>
+			<div class="arrow">&#8594;</div>
+		</div>
+		<div class="arrow">&#8595;</div>
+		<div>
+			<div class="arrow">&#8634;</div>
+			<div class="arrow">&#8635;</div>
+		</div>
+	</div>
+</div>
+
+<div class="center">
+	<button id="show-webview">Afficher le site de l'ISTY</button>
+</div>
+
+<div class="center">
+	<button id="learn-face">Apprendre un nouveau visage</button>
+</div>
+
+<div class="center">
+	<button id="get-learned-faces">Afficher la liste des visages connus</button>
+</div>
+
+<div id=controller >
+	<h2 id="start">Press a button on your controller to start</h2>
+  </div>
+
+<script>
+
+function PepperRobot(robotIp, services, onReady) {
+	QiSession(function (session) {
+		console.log("QiSession: connected");
+		this.session = session;
+		this.initServices(services);
+	}.bind(this), function () {
+		console.log("QiSession: disconnected");
+	}, robotIp);
+
+	this.initServices = function(list) {
+		if(list.length === 0)
+			return;
+
+		var serviceIndex = 0, initService = function(name) {
+			if(!name) {
+				onReady();
+				return;
+			}
+			console.log('init service: ' + name);
+			this.session.service(name).then(function(service) {
+				this[name] = service;
+				initService(list[++serviceIndex]);
+			}.bind(this));
+		}.bind(this);
+
+		initService(list[serviceIndex]);
+	};
+};
+
+
+
+function main() {
+	console.log('Pepper is ready!');
+
+	var updateBatteryLevelCallback = function(charge) {
+		pepper.ALBattery.getBatteryCharge().then(updateBatteryLevel);
+	}
+	
+	updateBatteryLevelCallback();
+	setInterval(updateBatteryLevelCallback, 10000);
+
+	var textToSpeechInput = document.querySelector('input#text-to-speech');
+	textToSpeechInput.addEventListener('keydown', function(e) {
+		if(e.keyCode === 13) // enter
+			pepper.ALTextToSpeech.say(e.target.value);
+	}, false);
+
+	var moveArrows = document.querySelectorAll('.move-pepper-arrows .arrow');
+	var stopMove = function() {
+		pepper.ALMotion.stopMove();
+	}
+	// forward
+	moveArrows[0].addEventListener('mousedown', function() {
+		pepper.ALMotion.move(1, 0, 0);
+	}, false);
+	moveArrows[0].addEventListener('mouseup', stopMove, false);
+	// left
+	moveArrows[1].addEventListener('mousedown', function() {
+		pepper.ALMotion.move(0, 1, 0);
+	}, false);
+	moveArrows[1].addEventListener('mouseup', stopMove, false);
+	// right
+	moveArrows[2].addEventListener('mousedown', function() {
+		pepper.ALMotion.move(0, -1, 0);
+	}, false);
+	moveArrows[2].addEventListener('mouseup', stopMove, false);
+	// backward
+	moveArrows[3].addEventListener('mousedown', function() {
+		pepper.ALMotion.move(-1, 0, 0);
+	}, false);
+	moveArrows[3].addEventListener('mouseup', stopMove, false);
+	// anticlockwise
+	moveArrows[4].addEventListener('mousedown', function() {
+		pepper.ALMotion.move(0, 0, 3.14);
+	}, false);
+	moveArrows[4].addEventListener('mouseup', stopMove, false);
+	// clockwise
+	moveArrows[5].addEventListener('mousedown', function() {
+		pepper.ALMotion.move(0, 0, -3.14);
+	}, false);
+	moveArrows[5].addEventListener('mouseup', stopMove, false);
+
+	window.onbeforeunload = function() {
+		pepper.ALVideoDevice.unsubscribeAllInstances();
+	};
+
+	var lastPerson = '';
+
+	pepper.ALMemory.subscriber('FaceDetected').then(function(subscriber) {
+		subscriber.signal.connect(function(info) {
+			// structure des données ici : http://doc.aldebaran.com/2-5/naoqi/peopleperception/alfacedetection.html#alfacedetection
+			// console.log(info); // décommenter pour afficher les infos sur les visages détectés
+			try {
+				var personName = info[1][0][1][2];
+
+				if(personName) {
+					console.log('face detected: ' + personName);
+
+					if(personName != lastPerson) {
+						pepper.ALTextToSpeech.say('Bonjour ' + personName);
+						lastPerson = personName;
+					}
+				}
+			} catch(e) {}
+			
+			console.log('Nombre de visages détectés : ' + ((info.length > 0) ? info[1].length - 1 : 0));
+		});
+	});
+	pepper.ALFaceDetection.subscribe('FaceDetected');
+
+	var hasEvents = 'ongamepadconnected' in window;
+	if (!hasEvents) {
+		setInterval(scangamepads, 500);
+	} else {
+		window.addEventListener("gamepadconnected", connecthandler);
+		window.addEventListener("gamepaddisconnected", disconnecthandler);
+	}
+
+	document.getElementById('show-webview').addEventListener('click', function() {
+		pepper.ALTabletService.showWebview('http://www.isty.uvsq.fr/');
+	}, false);
+
+	document.getElementById('learn-face').addEventListener('click', function() {
+		var name = prompt('Entrez le nom de la personne :');
+		if(name.length < 2) {
+			alert('Vous devez entrer au moins 2 caractères !');
+			return;
+		}
+		if(confirm('Veuillez vous placer devant le robot, puis appuyez sur OK'))
+			pepper.ALFaceDetection.learnFace(name);
+		else
+			alert('Vous avez annulé l\'opération');
+	}, false);
+
+	document.getElementById('get-learned-faces').addEventListener('click', function() {
+		pepper.ALFaceDetection.getLearnedFacesList().then(function(faces) {
+			alert('Visages que Pepper connait : ' + faces.join(', '));
+		});
+	}, false);
+
+	pepper.ALMemory.subscriber('BarcodeReader/BarcodeDetected').then(function(subscriber) {
+		subscriber.signal.connect(function(info) {
+			if(info[0].length === 0)
+				return;
+
+			switch(info[0][0]) {
+				case 'A':
+					// on affiche le site A
+					break;
+				case 'B':
+					// on affiche le site B
+					break;
+			}
+		});
+	});
+	pepper.ALBarcodeReader.subscribe('BarcodeReader/BarcodeDetected');
+
+	pepper.ALMemory.subscriber('LandmarkDetected').then(function(subscriber) {
+		subscriber.signal.connect(function(info) {
+			if(info[1].length === 0)
+				return;
+
+			switch(info[1][0][1]) {
+				case 'A':
+					// on affiche le site A
+					break;
+				case 'B':
+					// on affiche le site B
+					break;
+			}
+		});
+	});
+	pepper.ALBarcodeReader.subscribe('LandmarkDetected');
+}
+
+function noteToFreq(str) {
+	var notes = {
+		'c': 16.35,
+		'c#': 17.32,
+		'cs': 17.32,
+		'df': 17.32,
+		'd': 18.35,
+		'd#': 19.45,
+		'ds': 19.45,
+		'ef': 19.45,
+		'e': 20.60,
+		'ff': 20.60,
+		'e#': 21.83,
+		'f': 21.83,
+		'f#': 23.12,
+		'fs': 23.12,
+		'gf': 23.12,
+		'g': 24.50,
+		'g#': 25.96,
+		'gs': 25.96,
+		'af': 25.96,
+		'a': 27.50,
+		'a#': 29.14,
+		'as': 29.14,
+		'b': 30.87,
+		'cf': 30.87
+	};
+
+	var note = str.replace(/[^a-gs#]/gi, '').slice(0, 2).toLowerCase();
+	var octave = parseInt(str.replace(/[^0-8]/g, ''));
+	octave = isNaN(octave) ? 0 : octave;
+
+	return notes[note] * Math.pow(2, octave);
+}
+
+function playNotes(volume, notes) {
+	var i = 0;
+
+	var playNextNote = function() {
+		if(i >= notes.length)
+			return;
+
+		if(notes[i].length === 2)
+			pepper.ALAudioDevice.playSine(noteToFreq(notes[i][0]), volume, 0, notes[i][1]);
+
+		setTimeout(playNextNote, notes[i++][1] * 1000 + 50);
+	};
+
+	playNextNote();
+}
+
+function playNotesWithRhythm(volume, notes, rhythm) {
+	if(notes.length !== rhythm.length)
+		throw 'notes.length != rhythm.length';
+
+	var song = [];
+
+	for(var i = 0; i < notes.length; i++)
+		song.push((notes[i] === 0) ? [] : [notes[i], rhythm[i]]);
+
+	playNotes(volume, song);
+}
+
+// début de Lettre à Elise de Beethoven :
+playNotes(50, [['e5',0.2],['d#5',0.2],['e5',0.2],['d#5',0.2],['e5',0.2],['b4',0.2],['d5',0.2],['c5',0.2],['a4',0.5]]);
+
+var pepper = new PepperRobot('192.168.43.2', [
+	'ALMotion',
+	'ALMemory',
+	'ALBattery',
+	'ALRobotPosture',
+	'ALTextToSpeech',
+	'ALTabletService',
+	'ALFaceDetection',
+	'ALBehaviorManager',
+	'ALPeoplePerception',
+	'ALVisionRecognition',
+	'ALVideoDevice',
+	'ALLandMarkDetection',
+	'ALAudioDevice',
+	'ALSystem',
+	'ALCloseObjectDetection',
+	'ALAutonomousLife',
+	'ALBarcodeReader'
+], main);
+
+function updateBatteryLevel(charge) {
+	var progressBar = document.getElementById('battery-level').firstElementChild;
+	progressBar.textContent = 'Batterie : ' + charge + '%';
+	progressBar.style.width = charge + '%';
+}
+
+</script>
+
+</body>
+</html>
+
